@@ -2,19 +2,18 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
 
 #[derive(Debug)]
-struct Node<T> {
+struct Node<T: std::cmp::PartialOrd + Clone> {
     val: T,
     next: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+impl<T: std::cmp::PartialOrd + Clone> Node<T> {
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -23,19 +22,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T: std::cmp::PartialOrd + Clone> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -71,18 +70,39 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
+        let mut ret_list = Self {
             length: 0,
             start: None,
             end: None,
+        };
+        let mut a = list_a.start;
+        let mut b = list_b.start;
+        while a.is_some() || b.is_some() {
+            if a.is_some() && b.is_some() {
+                let va = unsafe { ((*(a.unwrap().as_ptr())).val).clone() };
+                let vb = unsafe { ((*(b.unwrap().as_ptr())).val).clone() };
+                if va <= vb {
+                    ret_list.add(va);
+                    a = unsafe { (*(a.unwrap().as_ptr())).next };
+                } else {
+                    ret_list.add(vb);
+                    b = unsafe { (*(b.unwrap().as_ptr())).next };
+                }
+            } else if a.is_some() {
+                unsafe { ret_list.add( ((*(a.unwrap().as_ptr())).val).clone()) };
+                a = unsafe { (*(a.unwrap().as_ptr())).next };
+            } else if b.is_some() {
+                unsafe { ret_list.add( ((*(b.unwrap().as_ptr())).val).clone()) };
+                b = unsafe { (*(b.unwrap().as_ptr())).next };
+            }
         }
+		ret_list
 	}
 }
 
 impl<T> Display for LinkedList<T>
 where
-    T: Display,
+    T: Display + std::cmp::PartialOrd + Clone,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
@@ -94,7 +114,7 @@ where
 
 impl<T> Display for Node<T>
 where
-    T: Display,
+    T: Display + std::cmp::PartialOrd + Clone,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.next {

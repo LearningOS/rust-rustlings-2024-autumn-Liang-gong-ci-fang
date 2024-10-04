@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,39 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        if self.count >= self.items.len() {
+            self.items.push(value);
+        } else {
+            self.items[self.count] = value;
+        }
+        self.bubble_up(self.count);
+    }
+
+    fn bubble_up(&mut self, idx: usize) {
+        let mut cur_idx = idx;
+        while cur_idx > 1 {
+            let parent_idx = self.parent_idx(cur_idx);
+            if (self.comparator)(&self.items[cur_idx], &self.items[parent_idx]) {
+                self.items.swap(cur_idx, parent_idx);
+                cur_idx = parent_idx;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn bubble_down(&mut self, idx: usize) {
+        let mut cur_idx = idx;
+        while self.children_present(cur_idx) {
+            let smallest_child_idx = self.smallest_child_idx(cur_idx);
+            if (self.comparator)(&self.items[smallest_child_idx], &self.items[cur_idx]) {
+                self.items.swap(cur_idx, smallest_child_idx);
+                cur_idx = smallest_child_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +88,18 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        if !self.children_present(idx) {
+            return 0;
+        }
+
+        let l_idx = self.left_child_idx(idx);
+        let r_idx = self.right_child_idx(idx);
+
+        if r_idx <= self.count && (self.comparator)(&self.items[r_idx], &self.items[l_idx]) {
+            r_idx
+        } else {
+            l_idx
+        }
     }
 }
 
@@ -77,17 +118,27 @@ where
     }
 }
 
-impl<T> Iterator for Heap<T>
+impl<T: Clone> Iterator for Heap<T>
 where
     T: Default,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        let root_value = self.items[1].clone();
+        self.items.swap(1, self.count);
+        self.count -= 1;
+
+        self.bubble_down(1);
+
+        Some(root_value)
     }
 }
+
 
 pub struct MinHeap;
 

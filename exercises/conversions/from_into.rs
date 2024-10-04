@@ -7,6 +7,8 @@
 // Execute `rustlings hint from_into` or use the `hint` watch subcommand for a
 // hint.
 
+use std::path::Component::Prefix;
+
 #[derive(Debug)]
 struct Person {
     name: String,
@@ -40,10 +42,40 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
-
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        // 第1步：如果提供的字符串长度为0，则返回 Person 的默认值
+        if s.is_empty() {
+            return Person::default();
+        }
+
+        // 第2步：在逗号处分割给定的字符串
+        let parts: Vec<&str> = s.split(',').collect();
+
+        if parts.len() != 2 {
+            return Person::default();
+        }
+
+        // 第3步：从分割操作中提取第一个元素，并将其用作名称
+        let name = parts.get(0).unwrap_or(&"").trim();
+
+        // 第4步：如果名称为空，则返回 Person 的默认值
+        if name.is_empty() {
+            return Person::default();
+        }
+
+        // 第5步：从分割操作中提取其他元素，并将其解析为 `usize` 作为年龄
+        let age = parts.get(1).and_then(|s| s.trim().parse::<usize>().ok()).unwrap_or(0);
+
+        if age == 0 {
+            return Person::default();
+        }
+
+        // 如果一切顺利，则用结果实例化 Person 对象并返回
+        Person {
+            name: name.to_string(),
+            age,
+        }
     }
 }
 

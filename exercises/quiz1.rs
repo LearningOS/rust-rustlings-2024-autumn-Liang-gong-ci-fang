@@ -18,9 +18,9 @@
 fn calculate_price_of_apples(number: i32) -> i32 {
 
     if number > 40 {
-        number
+        return number
     } else {
-        number * 2
+        return number * 2
     }
 }
 
